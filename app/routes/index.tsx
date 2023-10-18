@@ -18,8 +18,6 @@ export const router = createBrowserRouter([
     children: [
       { path: "login", lazy: () => import("./auth/Login.js") },
       { path: "signup", lazy: () => import("./auth/Login.js") },
-      { path: "privacy", lazy: () => import("./legal/Privacy.js") },
-      { path: "terms", lazy: () => import("./legal/Terms.js") },
     ],
   },
   {
@@ -29,17 +27,6 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <Navigate to="/dashboard" replace /> },
       { path: "dashboard", lazy: () => import("./dashboard/Dashboard.js") },
-      {
-        path: "settings",
-        lazy: () => import("./settings/SettingsLayout.js"),
-        children: [
-          { index: true, element: <Navigate to="/settings/account" /> },
-          {
-            path: "account",
-            lazy: () => import("./settings/AccountDetails.js"),
-          },
-        ],
-      },
     ],
   },
 ]);

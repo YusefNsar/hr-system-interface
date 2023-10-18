@@ -1,7 +1,7 @@
 /* SPDX-FileCopyrightText: 2014-present Kriasoft */
 /* SPDX-License-Identifier: MIT */
 
-import { Brightness4, Logout, Settings } from "@mui/icons-material";
+import { Brightness4, Logout } from "@mui/icons-material";
 import {
   Link,
   ListItemIcon,
@@ -34,11 +34,6 @@ export function UserMenu(props: UserMenuProps): JSX.Element {
       MenuListProps={{ ...MenuListProps, dense: true }}
       {...other}
     >
-      <MenuItem component={NavLink} to="/settings" onClick={close}>
-        <ListItemIcon sx={{ minWidth: 40 }} children={<Settings />} />
-        <ListItemText primary="Account Details" />
-      </MenuItem>
-
       <MenuItem>
         <ListItemIcon sx={{ minWidth: 40 }} children={<Brightness4 />} />
         <ListItemText primary="Dark Mode" />
@@ -65,11 +60,11 @@ export function UserMenu(props: UserMenuProps): JSX.Element {
           fontSize: "0.75rem",
         }}
       >
-        <span>&copy; 2021 Company Name</span>
+        <span>&copy; 2023 IVoiceUp</span>
         <span style={{ padding: "0 4px" }}>•</span>
         <Link
           sx={{ color: "inherit" }}
-          to="/privacy"
+          to=""
           component={NavLink}
           onClick={close}
           children="Privacy"
@@ -77,7 +72,7 @@ export function UserMenu(props: UserMenuProps): JSX.Element {
         <span style={{ padding: "0 4px" }}>•</span>
         <Link
           sx={{ color: "inherit" }}
-          to="/terms"
+          to=""
           component={NavLink}
           onClick={close}
           children="Terms"
@@ -104,9 +99,10 @@ function useHandleSignOut(onClose?: MenuProps["onClose"]) {
     (event: React.MouseEvent) => {
       event.preventDefault();
       onClose?.(event, "backdropClick");
-      signOut().then(() => navigate("/"));
+      signOut();
+      navigate("/");
     },
-    [onClose, signOut, navigate],
+    [onClose, navigate, signOut],
   );
 }
 

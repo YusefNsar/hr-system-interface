@@ -5,21 +5,13 @@ import {
   Alert,
   Button,
   Container,
-  Divider,
   Link,
+  Stack,
   TextField,
   Typography,
 } from "@mui/material";
-import { useLocation } from "react-router-dom";
-import { AuthIcon } from "../../icons/AuthIcon.js";
-import {
-  useHandleChange,
-  useHandleSignIn,
-  useHandleSubmit,
-  useState,
-  useSwitchSAML,
-} from "./Login.hooks.js";
-import { Notice } from "./Notice.js";
+import { Link as RouterLink, useLocation } from "react-router-dom";
+import { useHandleChange, useHandleSubmit, useState } from "./Login.hooks.js";
 
 /**
  * The login and registration page inspired by Notion. Example:
@@ -30,11 +22,13 @@ import { Notice } from "./Notice.js";
 export function Component(): JSX.Element {
   const [state, setState] = useState();
   const handleChange = useHandleChange(setState);
-  const handleSignIn = useHandleSignIn(setState);
-  const [handleSubmit, submitInFlight] = useHandleSubmit(state);
-  const switchSAML = useSwitchSAML(setState);
-  const { pathname, search } = useLocation();
+  const { pathname } = useLocation();
   const isSignUp = pathname === "/signup";
+  const [handleSubmit, submitInFlight] = useHandleSubmit(
+    state,
+    setState,
+    isSignUp,
+  );
 
   return (
     <Container
@@ -62,31 +56,23 @@ export function Component(): JSX.Element {
         />
       )}
 
-      {state.otpSent && (
-        <Alert sx={{ mb: 2 }} severity="success">
-          Please enter the One Time Password (OTP) that has been sent to your
-          email address.
-        </Alert>
-      )}
-
       <form id="login-form" onSubmit={handleSubmit}>
-        {state.otpSent ? (
-          <TextField
-            key="code"
-            name="code"
-            variant="outlined"
-            label="OTP code"
-            placeholder="Enter OTP code..."
-            InputLabelProps={{ shrink: true }}
-            InputProps={{ sx: { fontWeight: 700 } }}
-            onChange={handleChange}
-            disabled={submitInFlight}
-            autoComplete="off"
-            autoFocus
-            fullWidth
-            required
-          />
-        ) : (
+        <Stack sx={{ gap: "1rem" }}>
+          {isSignUp && (
+            <TextField
+              key="name"
+              name="name"
+              type="text"
+              variant="outlined"
+              label="Name"
+              placeholder="Enter your name..."
+              InputLabelProps={{ shrink: true }}
+              onChange={handleChange}
+              disabled={submitInFlight}
+              fullWidth
+              required
+            />
+          )}
           <TextField
             key="email"
             name="email"
@@ -100,7 +86,21 @@ export function Component(): JSX.Element {
             fullWidth
             required
           />
-        )}
+
+          <TextField
+            key="password"
+            name="password"
+            type="password"
+            variant="outlined"
+            label="Password"
+            placeholder="Enter password..."
+            InputLabelProps={{ shrink: true }}
+            onChange={handleChange}
+            disabled={submitInFlight}
+            fullWidth
+            required
+          />
+        </Stack>
       </form>
 
       <Button
@@ -109,11 +109,7 @@ export function Component(): JSX.Element {
         type="submit"
         variant="outlined"
         size="large"
-        children={
-          state.otpSent
-            ? "Sign In"
-            : `Continue with ${state.saml ? "SAML" : "Email"}`
-        }
+        children={`Continue with Email`}
         disabled={submitInFlight}
         fullWidth
       />
@@ -123,74 +119,16 @@ export function Component(): JSX.Element {
         variant="body2"
         align="center"
       >
-        You can also{" "}
+        {isSignUp ? "Already have an account? " : "Don't have account yet? "}
         <Link
           sx={{ ":hover": { color: "text.primary" } }}
           color="inherit"
-          href={`${pathname}${search}`}
-          onClick={switchSAML}
+          to={isSignUp ? "/login" : "/signup"}
+          component={RouterLink}
         >
-          continue with {state.saml ? "email" : "SAML SSO"}
+          {isSignUp ? "Login" : "Sign Up"}
         </Link>
       </Typography>
-
-      <Divider
-        sx={{ color: "divider", order: isSignUp ? undefined : -1 }}
-        children="OR"
-      />
-
-      <Button
-        sx={{
-          backgroundColor: (theme) =>
-            theme.palette.mode === "light" ? "white" : undefined,
-          order: isSignUp ? undefined : -2,
-        }}
-        color="inherit"
-        type="submit"
-        variant="outlined"
-        size="large"
-        children="Continue with Google"
-        startIcon={<AuthIcon variant="google.com" />}
-        onClick={handleSignIn}
-        data-method="google.com"
-        fullWidth
-      />
-
-      <Button
-        sx={{
-          backgroundColor: (theme) =>
-            theme.palette.mode === "light" ? "white" : undefined,
-          order: isSignUp ? undefined : -2,
-        }}
-        color="inherit"
-        type="submit"
-        variant="outlined"
-        size="large"
-        children="Continue with Apple"
-        startIcon={<AuthIcon variant="apple.com" />}
-        onClick={handleSignIn}
-        data-method="apple.com"
-        fullWidth
-      />
-
-      <Button
-        sx={{
-          backgroundColor: (theme) =>
-            theme.palette.mode === "light" ? "white" : undefined,
-          order: isSignUp ? undefined : -2,
-        }}
-        color="inherit"
-        type="submit"
-        variant="outlined"
-        size="large"
-        children="Continue as anonymous"
-        startIcon={<AuthIcon color="inherit" variant="anonymous" />}
-        onClick={handleSignIn}
-        data-method="anonymous"
-        fullWidth
-      />
-
-      <Notice sx={{ mt: 4 }} />
     </Container>
   );
 }

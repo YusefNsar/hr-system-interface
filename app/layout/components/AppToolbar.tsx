@@ -1,7 +1,7 @@
 /* SPDX-FileCopyrightText: 2014-present Kriasoft */
 /* SPDX-License-Identifier: MIT */
 
-import { ArrowDropDown, NotificationsNone } from "@mui/icons-material";
+import { ArrowDropDown } from "@mui/icons-material";
 import {
   AppBar,
   AppBarProps,
@@ -16,7 +16,6 @@ import * as React from "react";
 import { Link as NavLink } from "../../common/Link.js";
 import { useCurrentUser } from "../../core/auth.js";
 import { Logo } from "./Logo.js";
-import { NotificationsMenu } from "./NotificationsMenu.js";
 import { ThemeButton } from "./ThemeButton.js";
 import { UserMenu } from "./UserMenu.js";
 
@@ -27,16 +26,7 @@ export function AppToolbar(props: AppToolbarProps): JSX.Element {
 
   const [anchorEl, setAnchorEl] = React.useState({
     userMenu: null as HTMLElement | null,
-    notifications: null as HTMLElement | null,
   });
-
-  function openNotificationsMenu() {
-    setAnchorEl((x) => ({ ...x, notifications: menuAnchorRef.current }));
-  }
-
-  function closeNotificationsMenu() {
-    setAnchorEl((x) => ({ ...x, notifications: null }));
-  }
 
   function openUserMenu() {
     setAnchorEl((x) => ({ ...x, userMenu: menuAnchorRef.current }));
@@ -80,30 +70,8 @@ export function AppToolbar(props: AppToolbarProps): JSX.Element {
             }}
             component={NavLink}
             href="/"
-            avatar={
-              <Avatar
-                alt={me?.displayName || (me?.isAnonymous ? "Anonymous" : "")}
-                src={me?.photoURL || undefined}
-              />
-            }
-            label={getFirstName(
-              me?.displayName || (me?.isAnonymous ? "Anonymous" : ""),
-            )}
-          />
-        )}
-        {me && (
-          <IconButton
-            sx={{
-              marginLeft: (x) => x.spacing(1),
-              backgroundColor: (x) =>
-                x.palette.mode === "light"
-                  ? x.palette.grey[300]
-                  : x.palette.grey[700],
-              width: 40,
-              height: 40,
-            }}
-            children={<NotificationsNone />}
-            onClick={openNotificationsMenu}
+            avatar={<Avatar alt={me?.name} />}
+            label={getFirstName(me?.name)}
           />
         )}
         {me && (
@@ -143,12 +111,6 @@ export function AppToolbar(props: AppToolbarProps): JSX.Element {
       </Toolbar>
 
       {/* Pop-up menus */}
-
-      <NotificationsMenu
-        anchorEl={anchorEl.notifications}
-        onClose={closeNotificationsMenu}
-        PaperProps={{ sx: { marginTop: "8px" } }}
-      />
       <UserMenu
         anchorEl={anchorEl.userMenu}
         onClose={closeUserMenu}

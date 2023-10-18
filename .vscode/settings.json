@@ -80,5 +80,6 @@
     "webflow",
     "yarnpkg",
     "yarnrc"
-  ]
+  ],
+  "cSpell.words": ["groupable", "Loged"]
 }

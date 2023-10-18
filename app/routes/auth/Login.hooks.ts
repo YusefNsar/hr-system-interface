@@ -1,8 +1,12 @@
 /* SPDX-FileCopyrightText: 2014-present Kriasoft */
 /* SPDX-License-Identifier: MIT */
 
+import { useSnackbar } from "notistack";
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
+import { useSetRecoilState } from "recoil";
+import { login, signup } from "../../core/api.js";
+import { CurrentUser } from "../../core/auth.js";
 import { SignInMethod, signIn } from "../../core/firebase.js";
 
 /**
@@ -10,8 +14,13 @@ import { SignInMethod, signIn } from "../../core/firebase.js";
  */
 export function useHandleSubmit(
   state: State,
+  setState: SetState,
+  isSignUp: boolean,
 ): [submit: React.FormEventHandler, inFlight: boolean] {
   const [inFlight, setInFlight] = React.useState(false);
+  const setCurrentUser = useSetRecoilState(CurrentUser);
+  const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
 
   return [
     React.useCallback(
@@ -19,14 +28,43 @@ export function useHandleSubmit(
         event.preventDefault();
         try {
           setInFlight(true);
-          console.log(state.email);
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-          throw new Error("Not implemented");
+          if (isSignUp) {
+            // signup request
+            const res = await signup(state);
+            if (!res || res.status < 200 || res.status >= 300) {
+              const error = res?.data?.message ?? "Signup failed.";
+              setState((prev) => ({ ...prev, error }));
+            } else {
+              setState((prev) =>
+                prev.error ? { ...prev, error: null } : prev,
+              );
+              enqueueSnackbar(
+                "Permission granted from admins, you can now login.",
+              );
+              navigate("/login");
+            }
+          } else {
+            // login request
+            const res = await login(state);
+            if (!res || res.status < 200 || res.status >= 300) {
+              const error = res?.data?.message ?? "Login failed.";
+              setState((prev) => ({ ...prev, error }));
+            } else {
+              setCurrentUser({
+                ...res?.data?.employee,
+                token: res?.data?.access_token,
+              });
+              setState((prev) =>
+                prev.error ? { ...prev, error: null } : prev,
+              );
+              navigate("/");
+            }
+          }
         } finally {
           setInFlight(false);
         }
       },
-      [state.email],
+      [state, navigate, setState, isSignUp, enqueueSnackbar, setCurrentUser],
     ),
     inFlight,
   ];
@@ -37,10 +75,9 @@ export function useHandleSubmit(
  */
 export function useState() {
   return React.useState({
+    name: "",
     email: "",
-    code: "",
-    saml: false,
-    otpSent: undefined as boolean | null | undefined,
+    password: "",
     error: undefined as string | null | undefined,
   });
 }
@@ -52,21 +89,6 @@ export function useHandleChange(setState: SetState) {
       setState((prev) =>
         prev[name] === value ? prev : { ...prev, [name]: value },
       );
-    },
-    [setState],
-  );
-}
-
-export function useSwitchSAML(setState: SetState) {
-  return React.useCallback(
-    (event: React.MouseEvent) => {
-      event.preventDefault();
-      setState((prev) => ({
-        ...prev,
-        saml: !prev.saml,
-        otpSent: false,
-        code: "",
-      }));
     },
     [setState],
   );
